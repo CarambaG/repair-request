@@ -1,0 +1,146 @@
+{{define "content"}}
+<section class="page-head">
+  <div>
+    <h1>Заявка #{{.Request.ID}}</h1>
+    <p class="muted">{{statusLabel .Request.Status}} · создана {{formatTime .Request.CreatedAt}}</p>
+  </div>
+  <a href="/requests" class="button secondary">Назад</a>
+</section>
+
+<section class="grid">
+  <article class="card">
+    <h2>{{.Request.Title}}</h2>
+    <dl class="details">
+      <dt>Заказчик</dt><dd>{{.Request.CustomerName}} · {{.Request.CustomerEmail}}</dd>
+      <dt>Адрес</dt><dd>{{.Request.Address}}</dd>
+      <dt>Описание</dt><dd class="preline">{{.Request.Description}}</dd>
+      <dt>Услуги</dt>
+      <dd>
+        {{if .RequestServices}}
+        <ul class="service-list">
+          {{range .RequestServices}}
+          <li>{{.ServiceName}} × {{.Quantity}}</li>
+          {{end}}
+        </ul>
+        {{else}}
+        <span class="muted">Не указаны</span>
+        {{end}}
+      </dd>
+      <dt>Статус</dt><dd><span class="badge">{{statusLabel .Request.Status}}</span></dd>
+      <dt>Смета</dt><dd>{{formatMoney .Request.EstimateAmountCents}}</dd>
+      {{if .Request.AccountantComment}}<dt>Комментарий бухгалтера</dt><dd class="preline">{{.Request.AccountantComment}}</dd>{{end}}
+      {{if .Request.CustomerComment}}<dt>Комментарий заказчика</dt><dd class="preline">{{.Request.CustomerComment}}</dd>{{end}}
+      {{if .Request.WorkerComment}}<dt>Комментарий рабочего</dt><dd class="preline">{{.Request.WorkerComment}}</dd>{{end}}
+    </dl>
+  </article>
+
+  <aside class="card">
+    <h2>Действия</h2>
+    {{if .Actions.accountant_send}}
+    <form method="post" action="/requests/{{.Request.ID}}/action" class="form compact">
+      <input type="hidden" name="_csrf" value="{{.CSRF}}">
+      <input type="hidden" name="action" value="accountant_send">
+      <label>Стоимость работ, ₽<input type="text" name="estimate" required placeholder="15000,00"></label>
+      <label>Комментарий<textarea name="comment" rows="4" maxlength="2000"></textarea></label>
+      <button type="submit">Передать заказчику</button>
+    </form>
+    {{end}}
+
+    {{if .Actions.customer_approve}}
+    <form method="post" action="/requests/{{.Request.ID}}/action" class="form compact">
+      <input type="hidden" name="_csrf" value="{{.CSRF}}">
+      <input type="hidden" name="action" value="customer_approve">
+      <label>Комментарий<textarea name="comment" rows="3" maxlength="2000"></textarea></label>
+      <button type="submit">Согласовать и передать рабочим</button>
+    </form>
+    {{end}}
+
+    {{if .Actions.customer_return}}
+    <form method="post" action="/requests/{{.Request.ID}}/action" class="form compact divider">
+      <input type="hidden" name="_csrf" value="{{.CSRF}}">
+      <input type="hidden" name="action" value="customer_return">
+      <label>Причина возврата бухгалтеру<textarea name="comment" rows="3" maxlength="2000" required></textarea></label>
+      <button type="submit" class="secondary">Вернуть бухгалтеру</button>
+    </form>
+    {{end}}
+
+    {{if .Actions.worker_start}}
+    <form method="post" action="/requests/{{.Request.ID}}/action" class="form compact">
+      <input type="hidden" name="_csrf" value="{{.CSRF}}">
+      <input type="hidden" name="action" value="worker_start">
+      <label>Комментарий<textarea name="comment" rows="3" maxlength="2000"></textarea></label>
+      <button type="submit">Взять в работу</button>
+    </form>
+    {{end}}
+
+    {{if .Actions.worker_complete}}
+    <form method="post" action="/requests/{{.Request.ID}}/action" class="form compact">
+      <input type="hidden" name="_csrf" value="{{.CSRF}}">
+      <input type="hidden" name="action" value="worker_complete">
+      <label>Комментарий по результату<textarea name="comment" rows="3" maxlength="2000"></textarea></label>
+      <button type="submit">Завершить работы</button>
+    </form>
+    {{end}}
+
+    {{if not .Actions.accountant_send}}{{if not .Actions.customer_approve}}{{if not .Actions.customer_return}}{{if not .Actions.worker_start}}{{if not .Actions.worker_complete}}
+      <p class="muted">Для вашей роли сейчас нет доступных действий.</p>
+    {{end}}{{end}}{{end}}{{end}}{{end}}
+  </aside>
+</section>
+
+<section class="grid">
+  <article class="card">
+    <h2>Вложения</h2>
+    {{if .Attachments}}
+    <ul class="attachments">
+      {{range .Attachments}}
+      <li class="attachment-row">
+        <div class="attachment-head">
+          <a href="/requests/{{$.Request.ID}}/attachments/{{.ID}}">{{.OriginalName}}</a>
+          {{if $.Actions.attachment_delete}}
+          <form method="post" action="/requests/{{$.Request.ID}}/attachments/{{.ID}}/delete" class="inline-form">
+            <input type="hidden" name="_csrf" value="{{$.CSRF}}">
+            <button type="submit" class="link-button destructive">Удалить</button>
+          </form>
+          {{end}}
+        </div>
+        <div class="attachment-meta muted small">{{formatBytes .SizeBytes}} · {{.UploadedByName}} · {{formatTime .CreatedAt}}</div>
+      </li>
+      {{end}}
+    </ul>
+    {{else}}
+    <p class="muted">Файлы пока не прикреплены.</p>
+    {{end}}
+  </article>
+
+  <aside class="card">
+    <h2>Добавить файлы</h2>
+    <form method="post" action="/requests/{{.Request.ID}}/attachments" class="form compact" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="{{.CSRF}}">
+      <label>
+        Файлы
+        <input type="file" name="attachments" multiple accept=".jpg,.jpeg,.png,.pdf" required>
+        <span class="help muted">Поддерживаются JPG, PNG и PDF.</span>
+      </label>
+      <button type="submit">Загрузить</button>
+    </form>
+  </aside>
+</section>
+
+<section class="card">
+  <h2>История движения</h2>
+  {{if .Events}}
+  <ol class="timeline">
+    {{range .Events}}
+    <li>
+      <div><b>{{.ActorName}}</b> · {{roleLabel .ActorRole}} · {{formatTime .CreatedAt}}</div>
+      <div>{{statusLabel .FromStatus}} → {{statusLabel .ToStatus}}</div>
+      {{if .Comment}}<p class="preline muted">{{.Comment}}</p>{{end}}
+    </li>
+    {{end}}
+  </ol>
+  {{else}}
+  <p class="muted">История пока пустая.</p>
+  {{end}}
+</section>
+{{end}}

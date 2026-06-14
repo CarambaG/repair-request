@@ -1,0 +1,22 @@
+{{define "content"}}
+<section class="card narrow">
+  <h1>Регистрация заказчика</h1>
+  <p class="muted">Через эту форму создается только роль заказчика. Бухгалтер и рабочий в первой версии создаются заранее.</p>
+  <form method="post" action="/register" class="form">
+    <label>
+      Имя
+      <input type="text" name="name" required maxlength="120">
+    </label>
+    <label>
+      Почта
+      <input type="email" name="email" autocomplete="email" required maxlength="255">
+    </label>
+    <label>
+      Пароль
+      <input type="password" name="password" autocomplete="new-password" required minlength="8">
+    </label>
+    <button type="submit">Создать аккаунт</button>
+  </form>
+  <p class="muted small"><a href="/login">Вернуться ко входу</a></p>
+</section>
+{{end}}

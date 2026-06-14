@@ -1,0 +1,49 @@
+{{define "content"}}
+<section class="card narrow-wide">
+  <h1>Новая заявка</h1>
+  <p class="muted">После создания заявка сразу попадет бухгалтеру.</p>
+  <form method="post" action="/requests" class="form" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="{{.CSRF}}">
+    <label>
+      Название работ
+      <input type="text" name="title" required maxlength="160" value="{{.Form.Title}}" placeholder="Например: ремонт розетки в офисе">
+    </label>
+    <label>
+      Адрес
+      <input type="text" name="address" required maxlength="255" value="{{.Form.Address}}" placeholder="Город, улица, помещение">
+    </label>
+    <label>
+      Описание проблемы
+      <textarea name="description" required maxlength="4000" rows="8" placeholder="Что нужно сделать, какие есть детали, когда удобно принять рабочего">{{.Form.Description}}</textarea>
+    </label>
+
+    <fieldset class="service-picker">
+      <legend>Услуги</legend>
+      <p class="help muted">Укажите количество по каждой нужной услуге. Если услуга не нужна, оставьте поле пустым или введите 0.</p>
+      <div class="service-grid">
+        {{range .ServiceCatalog}}
+        <label class="service-item">
+          <span>{{.Name}}</span>
+          <input
+            type="number"
+            name="service_qty_{{.Code}}"
+            min="0"
+            max="99"
+            step="1"
+            inputmode="numeric"
+            value="{{serviceQtyValue $.Form.ServiceQuantities .Code}}"
+            placeholder="0">
+        </label>
+        {{end}}
+      </div>
+    </fieldset>
+
+    <label>
+      Вложения
+      <input type="file" name="attachments" multiple accept=".jpg,.jpeg,.png,.pdf">
+      <span class="help muted">Можно приложить фото или PDF-файлы.</span>
+    </label>
+    <button type="submit">Передать бухгалтеру</button>
+  </form>
+</section>
+{{end}}

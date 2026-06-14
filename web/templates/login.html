@@ -1,0 +1,24 @@
+{{define "content"}}
+<section class="card narrow">
+  <h1>Вход</h1>
+  <p class="muted">Войдите под своей ролью, чтобы работать с заявками.</p>
+  <form method="post" action="/login{{if .Next}}?next={{.Next}}{{end}}" class="form">
+    <label>
+      Почта
+      <input type="email" name="email" autocomplete="email" required maxlength="255">
+    </label>
+    <label>
+      Пароль
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit">Войти</button>
+  </form>
+  <p class="muted small">Нет аккаунта заказчика? <a href="/register">Зарегистрироваться</a>.</p>
+  <div class="demo-users">
+    <h2>Тестовые пользователи</h2>
+    <p><b>Заказчик:</b> customer@example.com / password123</p>
+    <p><b>Бухгалтер:</b> accountant@example.com / password123</p>
+    <p><b>Рабочий:</b> worker@example.com / password123</p>
+  </div>
+</section>
+{{end}}

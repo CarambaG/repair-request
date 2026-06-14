@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: repair_requests
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d repair_requests"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      APP_ADDR: :8080
+      DATABASE_URL: postgres://app:app@db:5432/repair_requests?sslmode=disable
+      COOKIE_SECURE: "false"
+      DEV_SEED_USERS: "true"
+      SESSION_TTL_HOURS: "168"
+      BCRYPT_COST: "12"
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_BYTES: "10485760"
+      MAX_UPLOAD_TOTAL_BYTES: "52428800"
+      MAX_UPLOAD_FILES: "5"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
+    restart: "no"
+
+volumes:
+  pgdata:
+  uploads:

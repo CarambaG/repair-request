@@ -1,0 +1,46 @@
+{{define "content"}}
+<section class="page-head">
+  <div>
+    <h1>Заявки</h1>
+    <p class="muted">Текущая роль: {{roleLabel .CurrentUser.Role}}</p>
+  </div>
+  {{if eq .CurrentUser.Role "customer"}}
+  <a href="/requests/new" class="button">Создать заявку</a>
+  {{end}}
+</section>
+
+{{if .Requests}}
+<section class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>№</th>
+        <th>Название</th>
+        <th>Заказчик</th>
+        <th>Адрес</th>
+        <th>Статус</th>
+        <th>Смета</th>
+        <th>Обновлена</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Requests}}
+      <tr>
+        <td><a href="/requests/{{.ID}}">#{{.ID}}</a></td>
+        <td>{{.Title}}</td>
+        <td>{{.CustomerName}}</td>
+        <td>{{.Address}}</td>
+        <td><span class="badge">{{statusLabel .Status}}</span></td>
+        <td>{{formatMoney .EstimateAmountCents}}</td>
+        <td>{{formatTime .UpdatedAt}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</section>
+{{else}}
+<section class="card empty">
+  <p>Пока нет доступных заявок.</p>
+</section>
+{{end}}
+{{end}}
